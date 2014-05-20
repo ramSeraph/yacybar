@@ -25,3 +25,30 @@ body.browser-action
 {
     padding: 5px;
 }
+
+.options
+{
+    padding: 5px;
+}
+
+.options.ng-hide-add,
+.options.ng-hide-remove
+{
+    -webkit-transition:all linear 0.5s;
+    -moz-transition:all linear 0.5s;
+    -o-transition:all linear 0.5s;
+    transition:all linear 0.5s;
+    display:block!important;
+}
+
+.options.ng-hide-add.ng-hide-add-active,
+.options.ng-hide-remove
+{
+    opacity:0;
+}
+
+.options.ng-hide-add,
+.options.ng-hide-remove.ng-hide-remove-active
+{
+    opacity:1;
+}

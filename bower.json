@@ -7,6 +7,7 @@
     "angular-resource": "1.2.13",
     "angular-bootstrap": "0.10.0",
     "angular-mocks": "1.2.13",
+    "angular-animate": "1.2.13",
     "bootstrap-css": "3.0.0",
     "x2js": "master",
     "uri.js": "master"

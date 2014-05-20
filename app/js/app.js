@@ -5,6 +5,7 @@ angular.module('yacy', [
   'ui.bootstrap',
   'ngResource',
   'ngCookies',
+  'ngAnimate',
   'yacy.filters',
   'yacy.services',
   'yacy.directives',
