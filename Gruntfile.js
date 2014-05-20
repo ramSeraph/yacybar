@@ -44,7 +44,7 @@ module.exports = function (grunt) {
         'command': 'pkill -9 -f /scripts/web-server.js',
         'stdout': false,
         'stderr': false,
-        'exitCode': [0, 1]
+        'exitCode': [null, 0, 1]
       }
     }
   });

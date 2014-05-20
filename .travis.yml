@@ -10,6 +10,10 @@ language: node_js
 node_js:
   - 0.8
 
+install:
+  - npm install -g npm
+  - npm install
+
 before_script:
   - curl https://gist.github.com/santiycr/5139565/raw/sauce_connect_setup.sh | bash
   - export DISPLAY=:99.0
