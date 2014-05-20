@@ -11,6 +11,8 @@ describe('service', function () {
       storage.set('string', 'hello');
       storage.set('null', null);
       storage.set('undefined', undefined);
+      storage.set('key', 'value', 'area');
+      storage.set('area1.key1', 'value1');
     }));
     it('should check if value exists in localStorage', function () {
       expect(storage.has('boolean')).toEqual(true);
@@ -19,6 +21,10 @@ describe('service', function () {
       expect(storage.has('null')).toEqual(true);
       expect(storage.has('undefined')).toEqual(true);
       expect(storage.has('no existing key')).toEqual(false);
+      expect(storage.has('key', 'area')).toEqual(true);
+      expect(storage.has('key1', 'area1')).toEqual(true);
+      expect(storage.has('area.key')).toEqual(true);
+      expect(storage.has('area1.key1')).toEqual(true);
     });
     it('should retrieve value from localStorage', function () {
       expect(storage.get('boolean')).toEqual(true);
@@ -27,6 +33,10 @@ describe('service', function () {
       expect(storage.get('null')).toEqual(null);
       expect(storage.get('undefined')).toEqual(undefined);
       expect(storage.get('no existing key')).toEqual(null);
+      expect(storage.get('key', 'area')).toEqual('value');
+      expect(storage.get('area.key')).toEqual('value');
+      expect(storage.get('key1', 'area1')).toEqual('value1');
+      expect(storage.get('area1.key1')).toEqual('value1');
     });
     it('should remove value from localStorage', function () {
       storage.remove('boolean');
@@ -35,17 +45,42 @@ describe('service', function () {
       storage.remove('null');
       storage.remove('undefined');
       storage.remove('no existing key');
+      storage.remove('area.key');
+      storage.remove('key1', 'area1');
       expect(storage.has('boolean')).toEqual(false);
       expect(storage.has('integer')).toEqual(false);
       expect(storage.has('string')).toEqual(false);
       expect(storage.has('null')).toEqual(false);
       expect(storage.has('undefined')).toEqual(false);
+      expect(storage.has('area.key')).toEqual(false);
+      expect(storage.has('area1.key1')).toEqual(false);
     });
+  });
+  describe('options', function () {
+    var storage = null;
+    var options = null;
+    beforeEach(inject(function (_options_, _storage_) {
+      options = _options_;
+      storage = _storage_;
+    }));
+
+    it('should initialize to defaults', function () {
+      expect(options.get('peerAddress')).toEqual('localhost');
+      expect(options.get('peerPort')).toEqual(8090);
+      expect(options.get('enableDynamicUrls')).toEqual(false);
+    });
+
+    //TODO: find out how
+    //
+    //xit('should persist across instantiations', function () {
+    //  storage.set('peerAddress', '127.0.0.1', 'options');
+    //  expect(options.get('peerAddress')).toEqual('127.0.0.1');
+    //});
   });
   describe('api', function () {
     var api = null;
     var $httpBackend = null;
-    beforeEach(inject(function (_storage_, _$httpBackend_, _xml2json_, _api_) {
+    beforeEach(inject(function (options, _$httpBackend_, _xml2json_, _api_) {
       $httpBackend = _$httpBackend_;
       api = _api_;
     }));

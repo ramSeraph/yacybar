@@ -2,53 +2,26 @@
 /* Controllers */
 angular.module('yacy.controllers', []).controller('OptionsCtrl', [
   '$scope',
-  '$parse',
-  'storage',
-  function ($scope, $parse, storage) {
-    $scope.defaultOptions = {
-      'options.peerAddress': 'localhost',
-      'options.peerPort': 8090,
-      'options.enablePeerSsl': false,
-      'options.peerUsername': null,
-      'options.peerPassword': null,
-      'options.enableCrawlerSettings': true,
-      'options.crawlingFilter': '.*',
-      'options.crawlingDepth': 0,
-      'options.enableDynamicUrls': false,
-      'options.enableProxyCacheStoring': false,
-      'options.enableRemoteIndexing': false,
-      'options.enableStaticStopWordsExclusion': false,
-      'options.searchType': 'standard',
-      'options.contentType': 'text',
-      'options.maxResult': 10,
-      'options.resource': 'global',
-      'options.urlMask': '.*',
-      'options.enableSnippets': false,
-      'options.enableSearchPageAsStartPage': false,
-      'options.enableMessageNotification': false,
-      'options.enableCrawlerNotification': false,
-      'options.enableNewsNotification': false
-    };
+  'options',
+  function ($scope, options) {
+    $scope.options = options.options;
     $scope.init = function () {
       var watchModelChange = function (key) {
-        $scope.$watch(key, function (value) {
-          storage.set(key, value);
+        $scope.$watch('options.' + key, function (value) {
+          options.save(key, value);
         }, true);
       };
-      for (var key in this.defaultOptions) {
-        if (!storage.has(key)) {
-          storage.set(key, this.defaultOptions[key]);
-        }
-        var value = storage.get(key);
-        $parse(key).assign($scope, value);
+      for (var key in options.options) {
         watchModelChange(key);
       }
+      options.setOptionChangeCallBack(function() {
+        $scope.$apply();
+      });
     };
     $scope.reset = function () {
-      for (var key in this.defaultOptions) {
-        localStorage.removeItem(key);
+      for (var key in options.defaults) {
+        $scope.options[key] = options.defaults[key];
       }
-      this.init();
     };
   }
 ]).controller('BrowserActionCtrl', [

@@ -8,18 +8,42 @@ angular.module('yacy.services', []).factory('chrome', function () {
 }).factory('storage', function () {
   var Storage = function () {
   };
+  var qualify = function (area, key) {
+    return typeof(area) !== 'string' ? key : area + '.' + key;
+  };
+  
+  var watched = {
+  };
+  var eventListenerAdded = false;
+  var watchCallBack = function (ev) {
+    if (ev.key in watched) {
+      watched[ev.key].fn( watched[ev.key].key, angular.fromJson(ev.newValue));
+    }
+  };
   Storage.prototype = {
-    set: function (key, value) {
-      localStorage.setItem(key, angular.toJson(value));
+    set: function (key, value, area) {
+      localStorage.setItem(qualify(area, key), angular.toJson(value));
     },
-    get: function (key) {
-      return localStorage.getItem(key) === 'undefined' ? undefined : angular.fromJson(localStorage.getItem(key));
+    get: function (key, area) {
+      var got = localStorage.getItem(qualify(area, key));
+      return got === 'undefined' ? undefined : angular.fromJson(got);
     },
-    remove: function (key) {
-      localStorage.removeItem(key);
+    remove: function (key, area) {
+      localStorage.removeItem(qualify(area, key));
     },
-    has: function (key) {
-      return localStorage.getItem(key) === null ? false : true;
+    has: function (key, area) {
+      return localStorage.getItem(qualify(area, key)) === null ? false : true;
+    },
+    watch: function (key, fn, area) {
+      var k = qualify(area, key);
+      if (!eventListenerAdded) {
+        addEventListener('storage', watchCallBack, false);
+        eventListenerAdded = true;
+      }
+      watched[k] = {
+        fn : fn,
+        key : key
+      };
     }
   };
   return new Storage();
@@ -35,21 +59,87 @@ angular.module('yacy.services', []).factory('chrome', function () {
       return new X2JS();
     }
   };
-}).factory('api', [
-  '$resource',
+}).factory('options', [
   'storage',
+  function (storage) {
+    var storageArea = 'options';
+    var options = {};
+    var optionChangeCB = null;
+    var defaultOptions = {
+      // peer settings
+      'peerAddress': 'localhost',
+      'peerPort': 8090,
+      'enablePeerSsl': false,
+      'peerUsername': null,
+      'peerPassword': null,
+      // crawler settings
+      'enableCrawlerSettings': true,
+      'crawlingFilter': '.*',
+      'crawlingDepth': 0,
+      'enableDynamicUrls': false,
+      'enableProxyCacheStoring': false,
+      'enableRemoteIndexing': false,
+      'enableStaticStopWordsExclusion': false,
+      // search settings
+      'searchType': 'standard',
+      'contentType': 'text',
+      'maxResult': 10,
+      'resource': 'global',
+      'urlMask': '.*',
+      'enableSnippets': false,
+      // general settings
+      'enableSearchPageAsStartPage': false,
+      'enableMessageNotification': false,
+      'enableCrawlerNotification': false,
+      'enableNewsNotification': false
+    };
+    var cb = function (key, newVal) {
+      if (options[key] !== newVal) {
+        options[key] = newVal;
+        if (optionChangeCB !== null) {
+          optionChangeCB();
+        }
+      }
+    };
+    for (var key in defaultOptions) {
+      if (!storage.has(key, storageArea)) {
+        storage.set(key, defaultOptions[key], storageArea);
+      }
+      options[key] = storage.get(key, storageArea);
+      storage.watch(key, cb, storageArea);
+    }
+
+    return({
+      'options' : options,
+      'defaults' : defaultOptions,
+      'save' : function (key, value) {
+        if (value !== storage.get(key, storageArea)) {
+          storage.set(key, value, storageArea);
+        }
+      },
+      'get' : function (key) {
+        return options[key];
+      },
+      'setOptionChangeCallBack' : function (cb) {
+        optionChangeCB = cb;
+      }
+    });
+  }
+]).factory('api', [
+  '$resource',
   'xml2json',
   'uri',
-  function ($resource, storage, xml2json, uri) {
-    var Api = function ($resource, storage, xml2json, uri) {
+  'options',
+  function ($resource, xml2json, uri, options) {
+    var Api = function () {
       this.$resource = $resource;
-      this.storage = storage;
+      this.options = options;
       this.xml2json = xml2json.new();
       this.uri = uri;
       this.params = {
-        'protocol': storage.get('options.enablePeerSsl') ? 'https' : 'http',
-        'hostname': storage.get('options.peerAddress'),
-        'port': storage.get('options.peerPort') ? storage.get('options.peerPort') : ''
+        'protocol': options.get('enablePeerSsl') ? 'https' : 'http',
+        'hostname': options.get('peerAddress'),
+        'port': options.get('peerPort') ? options.get('peerPort') : ''
       };
     };
     Api.prototype = {
@@ -61,11 +151,11 @@ angular.module('yacy.services', []).factory('chrome', function () {
         uri.path('yacysearch.html');
         var params = {};
         params.search = query;
-        params.urlMaskFilter = storage.get('options.urlMask');
-        params.contentdom = storage.get('options.contentType');
-        params.count = storage.get('options.maxResult');
-        params.resource = storage.get('options.resource');
-        params.verify = storage.get('options.enableSnippets');
+        params.urlMaskFilter = options.get('urlMask');
+        params.contentdom = options.get('contentType');
+        params.count = options.get('maxResult');
+        params.resource = options.get('resource');
+        params.verify = options.get('enableSnippets');
         uri.search(params);
         return uri.toString();
       },
@@ -76,11 +166,11 @@ angular.module('yacy.services', []).factory('chrome', function () {
         var params = this.params;
         params.url = url;
         params.title = title;
-        params.crawlingDepth = storage.get('options.crawlingDepth');
-        params.localIndexing = !storage.get('options.enableRemoteIndexing');
-        params.xdstopw = storage.get('options.enableStaticStopWordsExclusion');
-        params.storeHTCache = storage.get('options.enableProxyCacheStoring');
-        params.crawlingQ = storage.get('options.enableDynamicUrls');
+        params.crawlingDepth = options.get('crawlingDepth');
+        params.localIndexing = !options.get('enableRemoteIndexing');
+        params.xdstopw = options.get('enableStaticStopWordsExclusion');
+        params.storeHTCache = options.get('enableProxyCacheStoring');
+        params.crawlingQ = options.get('enableDynamicUrls');
         return this.$resource(':protocol://:hostname' + ':' + ':port/QuickCrawlLink_p.xml?url=:url&title=:title&crawlingDepth=:crawlingDepth&localIndexing=:localIndexing&xdstopw=:xdstopw&storeHTCache=:storeHTCache&crawlingQ=:crawlingQ', params, {
           get: {
             method: 'GET',
@@ -125,6 +215,9 @@ angular.module('yacy.services', []).factory('chrome', function () {
         }).get();
       }
     };
-    return new Api($resource, storage, xml2json, uri);
+    return new Api();
   }
 ]);
+
+
+
