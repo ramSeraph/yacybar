@@ -169,5 +169,8 @@
   },
   "blacklist_name": {
     "message": "Blacklist name"
+  },
+  "more_options": {
+    "message": "More Options"
   }
 }
