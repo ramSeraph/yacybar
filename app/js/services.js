@@ -73,6 +73,7 @@ angular.module('yacy.services', []).factory('chrome', function () {
       'peerUsername': null,
       'peerPassword': null,
       // crawler settings
+      'autoCrawl': false,
       'enableCrawlerSettings': true,
       'crawlingFilter': '.*',
       'crawlingDepth': 0,

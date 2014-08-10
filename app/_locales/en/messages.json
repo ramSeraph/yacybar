@@ -172,5 +172,8 @@
   },
   "more_options": {
     "message": "More Options"
+  },
+  "auto_crawl": {
+    "message": "Auto crawl"
   }
 }

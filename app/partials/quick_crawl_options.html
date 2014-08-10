@@ -21,6 +21,13 @@
   <h4>{{"options"|translate}}</h4>
   <div class="control-group">
     <div class="controls">
+      <label for="auto_crawl" class="checkbox">
+        <input id="auto_crawl" type="checkbox" ng-model="options.autoCrawl" /> {{"auto_crawl"|translate}}
+      </label>
+    </div>
+  </div>
+  <div class="control-group">
+    <div class="controls">
       <label for="dynamic_urls" class="checkbox">
         <input id="dynamic_urls" type="checkbox" ng-model="options.enableDynamicUrls" /> {{"accept_dynamic_urls"|translate}}
       </label>

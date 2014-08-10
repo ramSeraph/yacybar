@@ -85,11 +85,68 @@ angular.module('yacy.controllers', []).controller('OptionsCtrl', [
   'chrome',
   'uri',
   'api',
-  function ($scope, chrome, uri, api) {
+  'options',
+  function ($scope, chrome, uri, api, options) {
     $scope.init = function () {
       chrome.omnibox.onInputEntered.addListener(function (query) {
         chrome.tabs.create({ url: api.getSearchUrl(query) });
       });
+
+      // auto crawl related
+      $scope.options = options.options;
+      var tabs = {};
+
+      var isTabReady = function (tab) {
+        var currentUrl = tabs[tab.id] ? tabs[tab.id].url : undefined;
+        // filter chrome local urls
+        if (tab.url && tab.url.lastIndexOf('chrome', 0) === 0) {
+          return false;
+        }
+        return (currentUrl !== tab.url && tab.url && (tab.title || tab.status === 'complete'));
+      };
+
+      // respond to change in tab url
+      var respond = function (tab) {
+        var crawled = false;
+        if (isTabReady(tab)) {
+          if (options.get('autoCrawl')) {
+            api.crawl(tab.url, tab.title);
+            crawled = true;
+          }
+          tabs[tab.id] = { url : tab.url, crawled : crawled, title : tab.title };
+        }
+      };
+
+      // setup listeners for tab events
+      chrome.tabs.onCreated.addListener(function (tab) {
+        respond(tab);
+      });
+      chrome.tabs.onUpdated.addListener(function (_tabid, _changeInfo, tab) {
+        respond(tab);
+      });
+      chrome.tabs.onRemoved.addListener(function (tabid) {
+        delete tabs[tabid];
+      });
+
+      // respond to changes in autoCrawl settings
+      $scope.$watch('options.autoCrawl', function (active) {
+        if (active) {
+          // first clear every uncrawled tab in our list
+          angular.forEach(tabs, function (tabid, data) {
+            if (data.crawled === false) {
+              api.crawl(data.url, data.title);
+              data.crawled = true;
+            }
+          });
+          // query all the tabs and add them to our list
+          chrome.tabs.query({}, function (tabsFromQuery) {
+            for (var i=0; i<tabsFromQuery.length; i++) {
+              respond(tabsFromQuery[i]);
+            }
+          });
+        }
+      }, true);
+
     };
   }
 ]);
