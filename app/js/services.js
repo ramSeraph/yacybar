@@ -197,18 +197,26 @@ angular.module('yacy.services', []).factory('chrome', function () {
       getBlacklistNames: function () {
         var params = this.params;
         var xml2json = this.xml2json;
-        return this.$resource(':protocol://:hostname' + ':' + ':port/xml/blacklists_p.xml?attrOnly=1', params, {
+        return this.$resource(':protocol://:hostname' + ':' + ':port/api/blacklists_p.xml?attrOnly=1', params, {
           get: {
             method: 'GET',
             transformResponse: function (data) {
               var response = {};
               try {
                 var jsonData = xml2json.xml_str2json(data); // jshint ignore:line
-                var list = jsonData.blacklists.list;
+                var list = [];
+                try {
+                  list = jsonData.blacklists.list;
+                } catch (e) {
+                }
+                if (!(list instanceof Array) && list !== undefined) {
+                  list = [ list ];
+                }
                 for (var i = 0; i < list.length; i++) {
                   response[i] = list[i]._name;
                 }
               } catch (e) {
+                console.log(e);
               }
               return response;
             }

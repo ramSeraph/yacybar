@@ -86,15 +86,22 @@ describe('service', function () {
     }));
     describe('get blacklist names', function () {
       it('should return blacklist names', function () {
-        $httpBackend.whenGET('http://localhost:8090/xml/blacklists_p.xml?attrOnly=1').respond('<?xml version="1.0" ?><blacklists><list crawler="1" dht="1" name="url.default.black" news="1" proxy="1" search="1" shared="1" surftips="1"></list><list crawler="1" dht="1" name="hello_world.black" news="1" proxy="1" search="1" shared="1" surftips="1"></list></blacklists>');
+        $httpBackend.whenGET('http://localhost:8090/api/blacklists_p.xml?attrOnly=1').respond('<?xml version="1.0" ?><blacklists><list crawler="1" dht="1" name="url.default.black" news="1" proxy="1" search="1" shared="1" surftips="1"></list><list crawler="1" dht="1" name="hello_world.black" news="1" proxy="1" search="1" shared="1" surftips="1"></list></blacklists>');
         var result = api.getBlacklistNames();
         $httpBackend.flush();
         expect(result.$resolved).toEqual(true);
         expect(result['0']).toEqual('url.default.black');
         expect(result['1']).toEqual('hello_world.black');
       });
+      it('should work with one blacklist name', function () {
+        $httpBackend.whenGET('http://localhost:8090/api/blacklists_p.xml?attrOnly=1').respond('<?xml version="1.0" ?><blacklists><list crawler="1" dht="1" name="url.default.black" news="1" proxy="1" search="1" shared="1" surftips="1"></blacklists>');
+        var result = api.getBlacklistNames();
+        $httpBackend.flush();
+        expect(result.$resolved).toEqual(true);
+        expect(result['0']).toEqual('url.default.black');
+      });
       it('should return no result', function () {
-        $httpBackend.whenGET('http://localhost:8090/xml/blacklists_p.xml?attrOnly=1').respond('');
+        $httpBackend.whenGET('http://localhost:8090/api/blacklists_p.xml?attrOnly=1').respond('');
         var result = api.getBlacklistNames();
         $httpBackend.flush();
         expect(result['0']).toEqual(undefined);

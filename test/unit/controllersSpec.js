@@ -77,13 +77,13 @@ describe('controllers', function () {
         }];
     }));
     it('should have first item in blacklist list chosen', function () {
-      $httpBackend.whenGET('http://localhost:8090/xml/blacklists_p.xml?attrOnly=1').respond('<?xml version="1.0" ?><blacklists><list crawler="1" dht="1" name="url.default.black" news="1" proxy="1" search="1" shared="1" surftips="1"></list><list crawler="1" dht="1" name="hello_world.black" news="1" proxy="1" search="1" shared="1" surftips="1"></list></blacklists>');
+      $httpBackend.whenGET('http://localhost:8090/api/blacklists_p.xml?attrOnly=1').respond('<?xml version="1.0" ?><blacklists><list crawler="1" dht="1" name="url.default.black" news="1" proxy="1" search="1" shared="1" surftips="1"></list><list crawler="1" dht="1" name="hello_world.black" news="1" proxy="1" search="1" shared="1" surftips="1"></list></blacklists>');
       scope.init();
       $httpBackend.flush();
       expect(scope.blacklistName).toEqual('url.default.black');
     });
     it('should be equal to null if no blacklists are grabbed', function () {
-      $httpBackend.whenGET('http://localhost:8090/xml/blacklists_p.xml?attrOnly=1').respond('');
+      $httpBackend.whenGET('http://localhost:8090/api/blacklists_p.xml?attrOnly=1').respond('');
       scope.init();
       $httpBackend.flush();
       expect(scope.blacklistName).toEqual(undefined);
