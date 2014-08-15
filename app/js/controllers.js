@@ -45,12 +45,15 @@ angular.module('yacy.controllers', []).controller('OptionsCtrl', [
       chrome.tabs.query({
         'active': true,
         'status': 'complete',
-        'highlighted': true
+        'highlighted': true,
+        'currentWindow': true
       }, function (tabs) {
-        $scope.title = tabs[0].title;
-        $scope.currentUrl = tabs[0].url;
-        $scope.blacklistUrl = $scope.currentUrl;
-        $scope.crawlUrl = $scope.currentUrl;
+        if (tabs && tabs.length) {
+          $scope.title = tabs[0].title;
+          $scope.currentUrl = tabs[0].url;
+          $scope.blacklistUrl = $scope.currentUrl;
+          $scope.crawlUrl = $scope.currentUrl;
+        }
       });
     };
     $scope.resetCrawl = function () {
