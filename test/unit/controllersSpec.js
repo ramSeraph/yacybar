@@ -147,4 +147,58 @@ describe('controllers', function () {
       $httpBackend.flush();
     });
   });
+  describe('BackgroundActionCtrl', function () {
+    var scope, chrome, options, api;
+    beforeEach(module('ngResource', 'yacy.controllers', 'yacy.services'));
+    beforeEach(inject(function ($rootScope, $controller, _uri_, _api_, _options_) {
+      scope = $rootScope.$new();
+      chrome = chromeMock;
+      options = _options_;
+      api = _api_;
+      $controller('BackgroundActionCtrl', {
+        $scope: scope,
+        chrome: chrome,
+        uri: _uri_,
+        api: _api_,
+        options: _options_
+      });
+      chrome.mock.tabs = [{
+          active: true,
+          'favIconUrl': 'http://www.example.com/favicon.ico',
+          'highlighted': true,
+          'id': 16,
+          'incognito': false,
+          'index': 0,
+          'pinned': false,
+          'selected': true,
+          'status': 'complete',
+          'title': 'title page',
+          'url': 'http://www.example.com/anyurl.html',
+          windowId: 1
+        },
+        {
+          active: true,
+          'favIconUrl': 'http://www.example.com/favicon.ico',
+          'highlighted': true,
+          'id': 17,
+          'incognito': false,
+          'index': 0,
+          'pinned': false,
+          'selected': true,
+          'status': 'complete',
+          'title': 'title page 1',
+          'url': 'http://www.example.com/anyurl1.html',
+          windowId: 2
+        }];
+    }));
+    it('should crawl all open tabs', function () {
+      spyOn(api, 'crawl');
+      scope.init();
+      scope.$apply(function () {
+        scope.options.autoCrawl = true;
+      });
+      expect(api.crawl).toHaveBeenCalledWith('http://www.example.com/anyurl.html', 'title page');
+      expect(api.crawl).toHaveBeenCalledWith('http://www.example.com/anyurl1.html', 'title page 1');
+    });
+  });
 });

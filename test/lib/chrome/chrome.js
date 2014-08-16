@@ -17,6 +17,24 @@ window.chromeMock = {
   tabs: {
     query: function (queryInfo, callback) {
       callback(chromeMock.mock.tabs);
+    },
+    onCreated: {
+      addListener : function() {
+      }
+    },
+    onUpdated: {
+      addListener : function() {
+      }
+    },
+    onRemoved: {
+      addListener : function() {
+      }
+    }
+  },
+  omnibox: {
+    onInputEntered : {
+      addListener : function () {
+      }
     }
   }
 };
