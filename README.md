@@ -6,10 +6,9 @@ Yacy toolbar for chrome
 
 To setup dev environment you need to run :
 
-    npm install -g bower
     npm install -g grunt-cli
     npm install
-    bower install
+    grunt setup
 
 Extension is located in app folder and you can load it in chrome through extension page
 

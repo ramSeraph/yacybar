@@ -1,6 +1,13 @@
 'use strict';
 module.exports = function (grunt) {
   grunt.initConfig({
+    'bower': {
+      'install': {
+        'options': {
+          'copy': false
+        }
+      }
+    },
     'crx': {
       'yacybar': {
         'src': 'app/',
@@ -53,5 +60,7 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-protractor-runner');
   grunt.loadNpmTasks('grunt-karma');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-bower-task');
+  grunt.registerTask('setup', 'setup dev env', 'bower:install');
   grunt.registerTask('run-tests', 'Run test suite', ['exec:stop-server', 'exec:run-server', 'karma:unit', 'protractor', 'jshint']);
 };
