@@ -29,7 +29,7 @@ exports.config = {
   chromeDriver: '/usr/bin/chromedriver',
   // If true, only chromedriver will be started, not a standalone selenium.
   // Tests for browsers other than chrome will not run.
-  chromeOnly: true,
+  chromeOnly: !process.env.TRAVIS,
   // Additional command line options to pass to selenium. For example,
   // if you need to change the browser timeout, use
   // seleniumArgs: ['-browserTimeout=60'],
