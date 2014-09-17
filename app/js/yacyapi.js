@@ -5,9 +5,23 @@ angular.module('yacy.services').factory('api', [
   'uri',
   'options',
   function ($resource, xml2json, uri, options) {
-    var Api = function () {
+    var InternalApi = function() {
+      //this.yacyPeer = new YacyPeer();
+    };
+
+    InternalApi.prototype = {
+      getSearchUrl: function (/*query*/) {
+      },
+      crawl: function (/*url, title*/) {
+      },
+      blacklist: function (/*url, name*/) {
+      },
+      getBlacklistNames: function () {
+      }
+    };
+
+    var ExternalApi = function() {
       this.$resource = $resource;
-      this.options = options;
       this.xml2json = xml2json.new();
       this.uri = uri;
       this.params = {
@@ -16,11 +30,8 @@ angular.module('yacy.services').factory('api', [
         'port': options.get('peerPort') ? options.get('peerPort') : ''
       };
     };
-    Api.prototype = {
+    ExternalApi.prototype = {
       getSearchUrl: function (query) {
-        if (!query) {
-          return null;
-        }
         var uri = this.uri.new(this.params);
         uri.path('yacysearch.html');
         var params = {};
@@ -97,9 +108,49 @@ angular.module('yacy.services').factory('api', [
         }).get();
       }
     };
-    return new Api();
+
+    var YacyApi = function() {
+      this.externalApi = null;
+      this.internalApi = null;
+    };
+
+    YacyApi.prototype = {
+      getApiImpl: function () {
+        var useExternal = options.get('peerIsExternal');
+        if (useExternal) {
+          if (this.externalApi === null) {
+            this.externalApi = new ExternalApi();
+          }
+          return this.externalApi;
+        } else {
+          if( this.internalApi === null ) {
+            this.internalApi = new InternalApi();
+          }
+          return this.internalApi;
+        }
+      },
+      getSearchUrl: function (query) {
+        if (!query) {
+          return null;
+        }
+        return this.getApiImpl().getSearchUrl(query);
+      },
+      crawl: function (url, title) {
+        if (!url || !title) {
+          return null;
+        }
+        return this.getApiImpl().crawl(url, title);
+      },
+      blacklist: function (url, name) {
+        if (!url || !name) {
+          return null;
+        }
+        return this.getApiImpl().blacklist(url, name);
+      },
+      getBlacklistNames: function () {
+        return this.getApiImpl().getBlacklistNames();
+      }
+    };
+    return new YacyApi();
   }
 ]);
-
-
-

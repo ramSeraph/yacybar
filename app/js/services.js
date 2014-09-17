@@ -67,6 +67,7 @@ angular.module('yacy.services', []).factory('chrome', function () {
     var optionChangeCB = null;
     var defaultOptions = {
       // peer settings
+      'peerIsExternal' : true,
       'peerAddress': 'localhost',
       'peerPort': 8090,
       'enablePeerSsl': false,
