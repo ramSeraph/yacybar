@@ -1,4 +1,4 @@
-# yacybar [![Build Status](https://travis-ci.org/antham/yacybar.png?branch=master)](https://travis-ci.org/antham/yacybar)
+# yacybar [![Build Status](https://travis-ci.org/ramSeraph/yacybar.png?branch=master)](https://travis-ci.org/ramSeraph/yacybar)
 
 Yacy toolbar for chrome
 
